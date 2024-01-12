@@ -59,6 +59,13 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    // This dependency contains most commonly used icons hence smaller in size.
+    // implementation("androidx.compose.material:material-icons-core:1.5.4")
+    // This dependency contains all the material icons hence larger in size.
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
+    //per càrrega assíncrona d'imatges
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

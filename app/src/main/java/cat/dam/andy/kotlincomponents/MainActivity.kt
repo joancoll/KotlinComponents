@@ -2,19 +2,21 @@ package cat.dam.andy.kotlincomponents
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -23,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,21 +33,32 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.sharp.Image
+import androidx.compose.material.icons.twotone.Image
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LargeFloatingActionButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -52,15 +66,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -77,10 +101,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import cat.dam.andy.kotlincomponents.ui.theme.KotlinComponentsTheme
+import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,6 +132,12 @@ class MainActivity : ComponentActivity() {
                     //SpacerDividerExample()
                     //ButtonExample()
                     //MoreButtonExample()
+                    //SimpleIcons()
+                    //CustomIcons()
+                    //IconButtonExample()
+                    //ImageExample()
+                    //ImageAsyncExample()
+                    ShowToastAndSnackBar()
                 }
 
             }
@@ -537,4 +573,416 @@ fun MoreButtonExample() {
         }
     }
 }
+
+@Composable
+fun SimpleIcons() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(imageVector = Icons.Default.Image, contentDescription = null)
+        Text(text = "Default")
+        Icon(imageVector = Icons.Filled.Image, contentDescription = null)
+        Text(text = "Filled (Default)")
+        Icon(imageVector = Icons.Outlined.Image, contentDescription = null)
+        Text(text = "Outlined")
+        Icon(imageVector = Icons.Rounded.Image, contentDescription = null)
+        Text(text = "Rounded")
+        Icon(imageVector = Icons.TwoTone.Image, contentDescription = null)
+        Text(text = "TwoTone")
+        Icon(imageVector = Icons.Sharp.Image, contentDescription = null)
+        Text(text = "Sharp")
+    }
+}
+
+@Composable
+fun CustomIcons() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Icona amb forma circular
+        Icon(
+            imageVector = Icons.Default.Image,
+            contentDescription = null,
+            modifier = Modifier
+                .size(50.dp)
+                .background(Color.Green, CircleShape)
+        )
+        Text(text = "CircleShape")
+        // Icona amb forma rectangular
+        Icon(
+            imageVector = Icons.Default.Image,
+            contentDescription = null,
+            modifier = Modifier
+                .size(50.dp)
+                .background(Color.LightGray, RectangleShape)
+        )
+        Text(text = "RectangleShape")
+        // Icona amb forma de tall
+        Icon(
+            imageVector = Icons.Default.Image,
+            contentDescription = null,
+            modifier = Modifier
+                .size(50.dp)
+                .background(Color.Red, CutCornerShape(8.dp))
+        )
+        Text(text = "CutCornerShape(8.dp)")
+        // Icona amb forma arrodonida
+        Icon(
+            imageVector = Icons.Default.Image,
+            contentDescription = null,
+            modifier = Modifier
+                .size(50.dp)
+                .background(Color.Cyan, RoundedCornerShape(8.dp))
+        )
+        Text(text = "RoundedCornerShape(8.dp)")
+        // Icona amb forma personalitzada
+        Icon(
+            imageVector = Icons.Default.Image,
+            contentDescription = null,
+            modifier = Modifier
+                .size(50.dp)
+                .background(Color.Yellow, object : Shape {
+                    override fun createOutline(
+                        size: androidx.compose.ui.geometry.Size,
+                        layoutDirection: LayoutDirection,
+                        density: Density
+                    ): Outline {
+                        return Outline.Rectangle(
+                            Rect(
+                                0f,
+                                0f,
+                                size.width * 2,
+                                size.height
+                            )
+                        )
+                    }
+                })
+        )
+        Text(text = "Shape personalitzada")
+        // Icona amb forma personalitzada
+        Icon(
+            imageVector = Icons.Default.Image,
+            contentDescription = null,
+            modifier = Modifier
+                .size(50.dp)
+                .background(Color.Magenta, object : Shape {
+                    override fun createOutline(
+                        size: androidx.compose.ui.geometry.Size,
+                        layoutDirection: LayoutDirection,
+                        density: Density
+                    ): Outline {
+                        return Outline.Generic(
+                            path = Path().apply {
+                                moveTo(0f, 0f)
+                                lineTo(size.width, 0f)
+                                lineTo(size.width / 2, size.height)
+                                close()
+                            }
+                        )
+                    }
+                })
+        )
+        Text(text = "Shape personalitzada 2")
+    }
+}
+
+@Composable
+fun IconButtonExample() {
+    val context = LocalContext.current
+    val interactionSource = remember {
+        MutableInteractionSource()
+    }
+    val pressState = interactionSource.collectIsPressedAsState()
+    val pressText = if (pressState.value) "clicant..." else "afegeix"
+    Column(modifier = Modifier.padding(10.dp, 10.dp)) {
+        IconButton(
+            onClick = {
+                Toast.makeText(context, "Clicat!", Toast.LENGTH_SHORT).show()
+            },
+            modifier = Modifier
+                .size(150.dp, 80.dp)
+                .clip(RoundedCornerShape(20))
+                .border(3.dp, color = Color.Magenta, shape = RoundedCornerShape(20)),
+            enabled = false,
+            interactionSource = interactionSource,
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = Color.Blue,
+                contentColor = Color.White,
+                disabledContainerColor = Color.Gray,
+                disabledContentColor = Color.White,
+            ),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Add button"
+                )
+                Text(
+                    text = pressText, fontSize = 18.sp
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ImageExample() {
+    val mypainterResource = painterResource(id = R.drawable.cats)
+    val mypainterDescription = "Cats"
+    val myCopyright = "©Andy"
+    FlowRow(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(6.dp)
+            .background(Color.Yellow),
+        horizontalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Imatge des de recursos drawables
+        Image(
+            painter = mypainterResource,
+            contentDescription = mypainterDescription,
+        )
+        // Imatge des de recursos drawables amb mida personalitzada
+        Image(
+            painter = mypainterResource,
+            contentDescription = mypainterDescription,
+            modifier = Modifier
+                .size(120.dp)
+        )
+        // Imatge des de recursos drawables amb cantonades arrodonides
+        Image(
+            painter = mypainterResource,
+            contentDescription = mypainterDescription,
+            modifier = Modifier
+                .size(120.dp)
+                .clip(CircleShape)
+                .background(Color.Green, CircleShape)
+        )
+        // Imatge des de recursos drawables amb forma circular i mida personalitzada
+        Image(
+            painter = mypainterResource,
+            contentDescription = mypainterDescription,
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.Cyan, RoundedCornerShape(16.dp))
+                .size(120.dp),
+            contentScale = ContentScale.Crop //perquè no es vegi estirada
+        )
+        // Imatge recursos drawables amb forma circular, mida personalitzada i vora
+        Image(
+            painter = mypainterResource,
+            contentDescription = mypainterDescription,
+            modifier = Modifier
+                .clip(CircleShape)
+                .size(120.dp)
+                //cal afegir clip a la vora perquè no sigui rectangular
+                .border(3.dp, color = Color.Red, shape = CircleShape),
+            contentScale = ContentScale.Crop
+        )
+        // Imatge des de recursos drawables amb forma circular i ombra
+        Image(
+            painter = mypainterResource,
+            contentDescription = mypainterDescription,
+            modifier = Modifier
+                .clip(CircleShape)
+                .size(120.dp)
+                //cal afegir clip perquè no sigui rectangular
+                .graphicsLayer(
+                    shadowElevation = 10f,
+                    shape = CircleShape
+                ),
+            contentScale = ContentScale.Crop
+        )
+        // Canviar color de fons imatge png per blau
+        Image(
+            painter = mypainterResource,
+            contentDescription = mypainterDescription,
+            modifier = Modifier
+                .size(120.dp)
+                .padding(8.dp)
+                .background(Color.Blue)
+        )
+        // Imatge des de recursos drawables amb color filter i BlendMode
+        Image(
+            painter = mypainterResource,
+            contentDescription = mypainterDescription,
+            modifier = Modifier
+                .size(180.dp)
+                .padding(8.dp),
+            colorFilter = ColorFilter.tint(Color.Magenta, BlendMode.Darken),
+        )
+
+        // Afegir text o un altre component sobre una imatge
+        Box(
+            //mida ajustada al contingut i aquest alineat a bottom start
+            modifier = Modifier
+                .wrapContentSize(align = Alignment.BottomStart)
+                .padding(8.dp)
+        ) {
+            Image(
+                painter = mypainterResource,
+                contentDescription = mypainterDescription,
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CutCornerShape(40, 40, 10, 10))
+                    .background(Color.White, CutCornerShape(40, 40, 10, 10))
+                    .zIndex(1f)
+            )
+            Box(
+                modifier = Modifier
+                    .wrapContentSize(align = Alignment.Center)
+                    // Ajustament per adaptar-se al contingut
+                    .zIndex(2f)
+                    .align(Alignment.BottomCenter)
+            ) {
+                // copyright
+                Text(
+                    text = myCopyright,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.Black,
+                    modifier = Modifier
+                        .padding(8.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ImageAsyncExample() {
+    // Columna per centrar el contingut
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Exemple càrrega d'imatges asíncrones des de la web
+        // (utilitzant Coil)
+        CoilImageComponent(
+            "https://agora.xtec.cat/iespladelestany/wp-content/uploads/usu35/2015/11/P1420828.jpg",
+            "Imatge asíncrona"
+        )
+    }
+}
+
+@Composable
+fun CoilImageComponent(imageUrl: String, desc: String) {
+    SubcomposeAsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(imageUrl)
+            .crossfade(true)
+            .build(),
+        contentDescription = desc,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colorFilter = ColorFilter.tint(Color.Blue)
+    ) {
+        when (painter.state) {
+            is AsyncImagePainter.State.Error -> {
+                Text(text = "Error carregant la imatge")
+            }
+
+            is AsyncImagePainter.State.Loading -> CircularProgressIndicator()
+            else -> Image(
+                painter = painter,
+                contentDescription = contentDescription,
+            )
+        }
+    }
+}
+
+@Composable
+fun ShowToastAndSnackBar() {
+    val context = LocalContext.current.applicationContext // Context per a Toast
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    val messageToShow = remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        // Botó per mostrar un Toast
+        Button(
+            onClick = {
+                Toast.makeText(context, "Això és un Toast!", Toast.LENGTH_SHORT).show()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Text("Mostrar Toast")
+        }
+
+        // Botó per mostrar la Snackbar original
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    messageToShow.value = "Això és una Snackbar!"
+                    snackbarHostState.showSnackbar(messageToShow.value)
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Text("Mostrar Snackbar")
+        }
+        // Utilitzem Box per situar la Snackbar a la part inferior de la pantalla
+        // (per defecte es mostra a la part superior)
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter //Change to your desired position
+        ) {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Snackbar(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .border(2.dp, Color.Black, RoundedCornerShape(8.dp)),
+                    shape = RoundedCornerShape(8.dp),
+                    containerColor = Color.Blue,
+                    contentColor = Color.White,
+                    content = {
+                        Text(
+                            text = messageToShow.value,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    action = {
+                        TextButton(
+                            onClick = {
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                            },
+                            content = {
+                                Text("Tancar", color = Color.Yellow)
+                            }
+                        )
+                    }
+                )
+            }
+        }
+    }
+}
+
+
+
+
+
+
 
