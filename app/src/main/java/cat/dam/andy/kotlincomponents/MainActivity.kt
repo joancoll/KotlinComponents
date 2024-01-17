@@ -1,6 +1,5 @@
 package cat.dam.andy.kotlincomponents
 
-import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -45,6 +44,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Air
@@ -102,6 +102,10 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.TimePickerLayoutType
 import androidx.compose.material3.rememberDatePickerState
@@ -206,7 +210,10 @@ class MainActivity : ComponentActivity() {
                     //ShowSliderExample()
                     //ShowDialogExample()
                     //ShowTimePickerWithDialog()
-                    ShowDatePickerWithDialog()
+                    //ShowDatePickerWithDialog()
+                    //ShowDropdownMenuExample()
+                    ShowExposedDropdownMenu()
+                    //ShowSearchableExposedDropdownMenu()
                 }
             }
         }
@@ -1956,4 +1963,184 @@ fun getDateFromMillis(millis: Long): DayMonthYear {
         calendar.get(Calendar.MONTH) + 1,
         calendar.get(Calendar.YEAR)
     )
+}
+
+@Composable
+fun ShowDropdownMenuExample() {
+    val context = LocalContext.current
+    val menuOptions = arrayOf("Opció 1", "Opció 2", "Opció 3", "Opció 4")
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentSize(Alignment.TopEnd)
+    ) {
+        IconButton(onClick = { expanded = !expanded }) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "More"
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            menuOptions.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(item) },
+                    onClick = {
+                        expanded = false
+                        Toast.makeText(context, item, Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ShowExposedDropdownMenu() {
+    val context = LocalContext.current
+    val coffeeDrinks = arrayOf("Americano", "Cappuccino", "Espresso", "Latte", "Mocha")
+    var expanded by remember { mutableStateOf(false) }
+    var selectedItemIndex by remember { mutableStateOf(0) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier.padding(16.dp),
+    ) {
+        TextField(
+            value = coffeeDrinks[selectedItemIndex],
+            onValueChange = {},
+            readOnly = true,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.menuAnchor()
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            coffeeDrinks.forEachIndexed { index, item ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = item,
+                            fontWeight = if (index == selectedItemIndex) FontWeight.Bold else null
+                        )
+                    },
+                    onClick = {
+                        selectedItemIndex = index
+                        expanded = false
+                        Toast.makeText(context, item, Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ShowSearchableExposedDropdownMenu() {
+    val context = LocalContext.current
+    val provincies = arrayOf(
+        "Àlaba",
+        "Alacant",
+        "Albacete",
+        "Almeria",
+        "Astúries",
+        "Àvila",
+        "Badajoz",
+        "Barcelona",
+        "Burgos",
+        "Càceres",
+        "Càdiz",
+        "Castelló",
+        "Ciutat Real",
+        "Còrdova",
+        "Cuenca",
+        "Girona",
+        "Granada",
+        "Guadalajara",
+        "Guipúscoa",
+        "Huelva",
+        "Osca",
+        "Illes Balears",
+        "Jaén",
+        "La Corunya",
+        "La Rioja",
+        "Las Palmas",
+        "León",
+        "Lleida",
+        "Lugo",
+        "Madrid",
+        "Màlaga",
+        "Murcia",
+        "Navarra",
+        "Ourense",
+        "Palència",
+        "Pontevedra",
+        "Salamanca",
+        "Santa Cruz de Tenerife",
+        "Segòvia",
+        "Sevilla",
+        "Sòria",
+        "Tarragona",
+        "Terol",
+        "Toledo",
+        "València",
+        "Valladolid",
+        "Bizkaia",
+        "Zamora",
+        "Zaragoza"
+    )
+    var expanded by remember { mutableStateOf(false) }
+    var selectedText by remember { mutableStateOf("") }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(32.dp)
+    ) {
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = {
+                expanded = !expanded
+            }
+        ) {
+            TextField(
+                value = selectedText,
+                onValueChange = { selectedText = it },
+                label = { Text(text = "Comença a escriure el nom de la província") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier.menuAnchor()
+            )
+
+            val filteredOptions =
+                provincies.filter { it.contains(selectedText, ignoreCase = true) }
+            if (filteredOptions.isNotEmpty()) {
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = {
+                        // We shouldn't hide the menu when the user enters/removes any character
+                    }
+                ) {
+                    filteredOptions.forEach { item ->
+                        DropdownMenuItem(
+                            text = { Text(text = item) },
+                            onClick = {
+                                selectedText = item
+                                expanded = false
+                                Toast.makeText(context, item, Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
