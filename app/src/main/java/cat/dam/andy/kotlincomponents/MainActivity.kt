@@ -26,9 +26,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,12 +43,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlaylistPlay
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Air
 import androidx.compose.material.icons.outlined.Image
@@ -59,6 +69,7 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -102,16 +113,32 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.TimePickerLayoutType
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -139,6 +166,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.state.ToggleableState
@@ -212,8 +240,12 @@ class MainActivity : ComponentActivity() {
                     //ShowTimePickerWithDialog()
                     //ShowDatePickerWithDialog()
                     //ShowDropdownMenuExample()
-                    ShowExposedDropdownMenu()
+                    //ShowExposedDropdownMenu()
                     //ShowSearchableExposedDropdownMenu()
+                    //ShowAppBars()
+                    //ShowNavigationExample()
+                    ShowModalDrawerSheet()
+                    //ShowModalBottomSheet()
                 }
             }
         }
@@ -2139,6 +2171,224 @@ fun ShowSearchableExposedDropdownMenu() {
                             }
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ShowAppBars() {
+    val context = LocalContext.current
+    var showTopAppBar by remember { mutableStateOf(true) }
+    var showBottomAppBar by remember { mutableStateOf(true) }
+
+    Scaffold(
+        topBar = {
+            if (showTopAppBar) {
+                TopAppBar(
+                    title = { Text(text = "TopAppBar") },
+                    actions = {
+                        IconButton(onClick = {
+                            Toast.makeText(
+                                context,
+                                "Top Option 1",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }) {
+                            Icon(Icons.Filled.Favorite, contentDescription = "Top Option 1")
+                        }
+                        IconButton(onClick = {
+                            Toast.makeText(
+                                context,
+                                "Top Option 2",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }) {
+                            Icon(Icons.Filled.Info, contentDescription = "Top Option 2")
+                        }
+                    }
+                )
+            }
+        },
+        bottomBar = {
+            if (showBottomAppBar) {
+                BottomAppBar {
+                    IconButton(onClick = {
+                        Toast.makeText(
+                            context,
+                            "Bottom Option 1",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }) {
+                        Icon(Icons.Filled.Home, contentDescription = "Bottom Option 1")
+                    }
+                    IconButton(onClick = {
+                        Toast.makeText(
+                            context,
+                            "Bottom Option 2",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Bottom Option 2")
+                    }
+                }
+            }
+        },
+        content = { paddingValues ->
+            // Contingut de la pàgina
+            Column(modifier = Modifier.padding(paddingValues)) {
+                Text(text = "Contingut de la pàgina")
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = showTopAppBar, onCheckedChange = { showTopAppBar = it })
+                    Text(text = "Mostra TopAppBar")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = showBottomAppBar,
+                        onCheckedChange = { showBottomAppBar = it })
+                    Text(text = "Mostra BottomAppBar")
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun ShowNavigationExample() {
+    var selectedItemBar by remember { mutableIntStateOf(0) }
+    val itemsBar = listOf("Songs", "Artists", "Playlists")
+    val iconsBar = listOf(Icons.Filled.MusicNote, Icons.Filled.Person, Icons.Filled.PlaylistPlay)
+    var selectedItemRail by remember { mutableIntStateOf(0) }
+    val itemsRail = listOf("Home", "Search", "Settings")
+    val iconsRail = listOf(Icons.Filled.Home, Icons.Filled.Search, Icons.Filled.Settings)
+    NavigationBar {
+        itemsBar.forEachIndexed { index, item ->
+            NavigationBarItem(
+                icon = { Icon(iconsBar[index], contentDescription = item) },
+                label = { Text(item) },
+                selected = selectedItemBar == index,
+                onClick = { selectedItemBar = index }
+            )
+        }
+    }
+    NavigationRail {
+        itemsRail.forEachIndexed { index, item ->
+            NavigationRailItem(
+                icon = { Icon(iconsRail[index], contentDescription = item) },
+                label = { Text(item) },
+                selected = selectedItemRail == index,
+                onClick = { selectedItemRail = index }
+            )
+        }
+    }
+}
+
+@Composable
+fun ShowModalDrawerSheet() {
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    val items = listOf(Icons.Default.Favorite, Icons.Default.Face, Icons.Default.Email)
+    val selectedItem = remember { mutableStateOf(items[0]) }
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Spacer(Modifier.height(12.dp))
+                items.forEach { item ->
+                    NavigationDrawerItem(
+                        icon = { Icon(item, contentDescription = null) },
+                        label = { Text(item.name) },
+                        selected = item == selectedItem.value,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            selectedItem.value = item
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+                }
+            }
+        },
+        content = {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = if (drawerState.isClosed) ">>> Swipe >>>" else "<<< Swipe <<<")
+                Spacer(Modifier.height(20.dp))
+                Button(onClick = { scope.launch { drawerState.open() } }) {
+                    Text("Click to open")
+                }
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ShowModalBottomSheet() {
+    var openBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var skipPartiallyExpanded by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = skipPartiallyExpanded
+    )
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(
+            Modifier.toggleable(
+                value = skipPartiallyExpanded,
+                role = Role.Checkbox,
+                onValueChange = { checked -> skipPartiallyExpanded = checked }
+            )
+        ) {
+            Checkbox(checked = skipPartiallyExpanded, onCheckedChange = null)
+            Spacer(Modifier.width(16.dp))
+            Text("Skip partially expanded State")
+        }
+        Button(onClick = { openBottomSheet = !openBottomSheet }) {
+            Text(text = "Show Bottom Sheet")
+        }
+    }
+
+// Sheet content
+    if (openBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { openBottomSheet = false },
+            sheetState = bottomSheetState,
+        ) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Button(
+                    onClick = {
+                        scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
+                            if (!bottomSheetState.isVisible) {
+                                openBottomSheet = false
+                            }
+                        }
+                    }
+                ) {
+                    Text("Hide Bottom Sheet")
+                }
+            }
+            LazyColumn {
+                items(50) {
+                    ListItem(
+                        headlineContent = { Text("Item $it") },
+                        leadingContent = {
+                            Icon(
+                                Icons.Default.Favorite,
+                                contentDescription = "Localized description"
+                            )
+                        }
+                    )
                 }
             }
         }
